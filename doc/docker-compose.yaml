@@ -1,6 +1,6 @@
 services:
   iom-db:
-    image: mariadb:11.2
+    image: mariadb:11.4
     restart: unless-stopped
     env_file:
       - db.env
@@ -36,7 +36,5 @@ services:
       # DB_USER: ${DB_USER}
       # DB_PASS: ${DB_PASS}
       # DB_NAME: ${DB_NAME}
-    # volumes:
-      # - ./config.yml:/wiki/config.yml
     ports:
       - 8084:3000
