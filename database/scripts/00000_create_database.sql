@@ -1,0 +1,3 @@
+CREATE DATABASE IF NOT EXISTS iom_db_test;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON iom_db_test.* TO 'tester'@'%';
