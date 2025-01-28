@@ -21,6 +21,8 @@ services:
       - 8083:8080
     networks:
       - development
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   iom-wiki:
     image: ghcr.io/requarks/wiki:2.5.305
