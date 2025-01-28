@@ -13,7 +13,6 @@
 /var/cache/*
 /var/logs/*
 /var/sessions/*
-.phpunit.result.cache
 !var/cache/.gitkeep
 !var/logs/.gitkeep
 !var/sessions/.gitkeep
