@@ -30,10 +30,11 @@ final class OrderControllerTest extends WebTestCase
             json_encode([
                 'name' => 'nome test',
                 'description' => 'description test',
-                'date' => $formattedDate, // Passa la data formattata
+                'date' => $formattedDate,
+                'products' => [1,2,3,4],
             ])
         );
-        
+    
         self::assertResponseIsSuccessful();
         self::assertSame(200, $client->getResponse()->getStatusCode());
         self::assertJson($client->getResponse()->getContent());

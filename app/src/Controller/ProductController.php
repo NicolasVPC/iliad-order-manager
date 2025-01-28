@@ -42,4 +42,30 @@ final class ProductController extends AbstractController
             'product_id' => $product->getId(),
         ]);
     }
+
+    public function getProduct(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $id = $request->query->get('id');
+
+        if (!$id) {
+            return $this->json([
+                'error' => 'Product ID is required.',
+            ], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $product = $entityManager->getRepository(Product::class)->find($id);
+
+        if (!$product) {
+            return $this->json([
+                'error' => 'Product not found.',
+            ], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        return $this->json([
+            'id' => $product->getId(),
+            'name' => $product->getName(),
+            'price' => $product->getPrice(),
+            'stock' => $product->getStock(),
+        ]);
+    }
 }

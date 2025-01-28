@@ -12,3 +12,8 @@ create_product:
     path: /create/order
     controller: App\Controller\OrderController::createOrder
     methods: POST
+
+get_product:
+    path: /get/product
+    controller: App\Controller\ProductController::getProduct
+    methods: GET

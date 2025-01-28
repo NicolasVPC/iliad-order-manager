@@ -25,7 +25,7 @@ final class OrderController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['name'], $data['date'])) {
+        if (!isset($data['name'], $data['date'], $data['products'])) {
             return $this->json([
                 'error' => 'Invalid input data.',
             ], JsonResponse::HTTP_BAD_REQUEST);
@@ -39,6 +39,16 @@ final class OrderController extends AbstractController
         $order->setName($data['name']);
         $order->setDescription($data['description']);
         $order->setDate(new DateTime($data['date']));
+        foreach ($data['products'] as $productId) {
+            $product = $entityManager->getRepository(Product::class)->find($productId);
+            if ($product) {
+                $order->addIdProduct($product);
+            } else {
+                return $this->json([
+                    'error' => "Product with ID {$productId} not found.",
+                ], JsonResponse::HTTP_BAD_REQUEST);
+            }
+        }
 
         $entityManager->persist($order);
         $entityManager->flush();
