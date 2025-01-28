@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ProductRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
@@ -21,6 +23,17 @@ class Product
 
     #[ORM\Column(nullable: true)]
     private ?int $stock = null;
+
+    /**
+     * @var Collection<int, Order>
+     */
+    #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: 'id_product')]
+    private Collection $id_order;
+
+    public function __construct()
+    {
+        $this->id_order = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -66,6 +79,33 @@ class Product
     public function setStock(?int $stock): static
     {
         $this->stock = $stock;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getIdOrder(): Collection
+    {
+        return $this->id_order;
+    }
+
+    public function addIdOrder(Order $idOrder): static
+    {
+        if (!$this->id_order->contains($idOrder)) {
+            $this->id_order->add($idOrder);
+            $idOrder->addIdProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIdOrder(Order $idOrder): static
+    {
+        if ($this->id_order->removeElement($idOrder)) {
+            $idOrder->removeIdProduct($this);
+        }
 
         return $this;
     }
