@@ -9,6 +9,6 @@ lucky_number:
     # controller: App\Controller\BlogController
 
 create_product:
-    path: /create/product
-    controller: App\Controller\ProductController::createProduct
+    path: /create/order
+    controller: App\Controller\OrderController::createOrder
     methods: POST
