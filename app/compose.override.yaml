@@ -27,4 +27,5 @@ services:
   database:
     ports:
       - "8088:3306"
+
 ###< doctrine/doctrine-bundle ###
