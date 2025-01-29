@@ -164,4 +164,42 @@ final class OrderController extends AbstractController
             return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_BAD_REQUEST);
         }
     }
+
+    public function getOrder(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $orderId = $request->query->get('id');
+
+        if (!$orderId) {
+            return $this->json(['error' => 'Order ID is required.'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $order = $entityManager->getRepository(Order::class)->find($orderId);
+            
+            if (!$order) {
+                throw new \Exception("Order with ID {$orderId} not found.");
+            }
+
+            $orderProducts = [];
+            foreach ($order->getOrderProductId() as $orderProduct) {
+                $orderProducts[] = [
+                    'product_id' => $orderProduct->getProductId()->getId(),
+                    'product_name' => $orderProduct->getProductId()->getName(),
+                    'quantity' => $orderProduct->getQuantity(),
+                ];
+            }
+
+            $response = [
+                'order_id' => $order->getId(),
+                'name' => $order->getName(),
+                'description' => $order->getDescription(),
+                'date' => $order->getDate()->format('Y-m-d'),
+                'products' => $orderProducts,
+            ];
+
+            return $this->json($response, JsonResponse::HTTP_OK);
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_BAD_REQUEST);
+        }
+    }
 }
