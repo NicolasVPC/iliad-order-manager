@@ -73,5 +73,30 @@ PhpUnit: `composer require symfony/test-pack --dev` </br>
 MakerBundle: `composer require symfony/maker-bundle --dev`
 
 ## How to run
+set the `.env` file inside `/app`:
+``` env
+APP_ENV=dev
+APP_SECRET=
+
+
+MYSQL_ROOT_PASSWORD=securerootpassword
+MYSQL_USER=tester
+MYSQL_PASSWORD=securepassword
+MYSQL_DATABASE=app
+
+DATABASE_URL=mysql://${MYSQL_USER}:${MYSQL_PASSWORD:-securepassword}@127.0.0.1:8088/${MYSQL_DATABASE:-app}?serverVersion=${MYSQL_VERSION:-8.4}&charset=${MYSQL_CHARSET:-utf8mb4}
+
+MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0
+```
+
+set the `db.env` file inside `/app/db`:
+> keep in mind that they must match the variables inside `/app/.env`
+``` env
+MYSQL_ROOT_PASSWORD=securerootpassword
+MYSQL_USER=tester
+MYSQL_PASSWORD=securepassword
+MYSQL_DATABASE=app
+```
+
 `docker compose up -d` should start the php and database services.
 enable the redis queue: `docker compose exec -d php bin/console messenger:consume redis_queue --time-limit=3600 --memory-limit=128M -vv`
