@@ -53,10 +53,6 @@ services:
       - ./db/data:/var/lib/mysql:rw
 ###< doctrine/doctrine-bundle ###
 
-  redis:
-    image: redis:alpine
-    container_name: redis
-
 volumes:
   caddy_data:
   caddy_config:
