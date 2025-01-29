@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Order;
+use App\Entity\OrderProduct;
 use App\Entity\Product;
 use App\Message\CreateOrderMessage;
 use DateTime;
@@ -50,27 +51,88 @@ final class OrderController extends AbstractController
     public function deleteOrder(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-
+    
         if (!isset($data['order_id'])) {
             return $this->json([
                 'error' => 'Order ID is required.',
             ], JsonResponse::HTTP_BAD_REQUEST);
         }
-
+    
         $order = $entityManager->getRepository(Order::class)->find($data['order_id']);
-
+    
         if (!$order) {
             return $this->json([
                 'error' => "Order with ID {$data['order_id']} not found.",
             ], JsonResponse::HTTP_NOT_FOUND);
         }
-
+    
+        // Remove related OrderProduct entities
+        foreach ($order->getOrderProductId() as $orderProduct) {
+            $order->removeOrderProductId($orderProduct);
+            $entityManager->remove($orderProduct);
+        }
+    
+        // Remove the order
         $entityManager->remove($order);
         $entityManager->flush();
-
+    
         return $this->json([
             'message' => "Order with ID {$data['order_id']} deleted successfully!",
         ], JsonResponse::HTTP_OK);
+    }    
+
+    public function createOrderTest(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['name']) || !isset($data['description']) || !isset($data['date']) || !isset($data['products'])) {
+            return $this->json([
+                'error' => 'Name, description, date, and products are required.',
+            ], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $order = new Order();
+        $order->setName($data['name']);
+        $order->setDescription($data['description']);
+        $order->setDate(new DateTime($data['date']));
+
+        foreach ($data['products'] as $productData) {
+            if (isset($productData['id']) && isset($productData['quantity'])) {
+                $product = $entityManager->getRepository(Product::class)->find($productData['id']);
+                if ($product) {
+                    if ($product->getStock() >= $productData['quantity']) {
+                        $orderProduct = new OrderProduct();
+                        $orderProduct->setOrderId($order);
+                        $orderProduct->setProductId($product);
+                        $orderProduct->setQuantity($productData['quantity']);
+
+                        $order->addOrderProductId($orderProduct);
+
+                        $entityManager->persist($orderProduct);
+                    } else {
+                        return $this->json([
+                            'error' => "Product with ID {$productData['id']} has insufficient stock (requested: {$productData['quantity']}).",
+                        ], JsonResponse::HTTP_BAD_REQUEST);
+                    }
+                } else {
+                    return $this->json([
+                        'error' => "Product with ID {$productData['id']} not found.",
+                    ], JsonResponse::HTTP_BAD_REQUEST);
+                }
+            } else {
+                return $this->json([
+                    'error' => 'Each product must have an ID and a quantity.',
+                ], JsonResponse::HTTP_BAD_REQUEST);
+            }
+        }
+
+        $entityManager->persist($order);
+        $entityManager->flush();
+
+        return $this->json([
+            'message' => 'Order created successfully.',
+            'order_id' => $order->getId(),
+        ], JsonResponse::HTTP_CREATED);
     }
 
     public function updateOrder(Request $request, EntityManagerInterface $entityManager): JsonResponse
@@ -91,6 +153,7 @@ final class OrderController extends AbstractController
             ], JsonResponse::HTTP_NOT_FOUND);
         }
 
+        // Update order details
         if (isset($data['name'])) {
             $order->setName($data['name']);
         }
@@ -101,18 +164,39 @@ final class OrderController extends AbstractController
             $order->setDate(new DateTime($data['date']));
         }
 
+        // Update products (id and quantity)
         if (isset($data['products'])) {
-            foreach ($order->getIdProduct() as $product) {
-                $order->removeIdProduct($product);
+            // Remove existing products (OrderProduct)
+            foreach ($order->getOrderProductId() as $orderProduct) {
+                $order->removeOrderProductId($orderProduct); // Assuming a removeOrderProduct method exists
+                $entityManager->remove($orderProduct); // Delete the OrderProduct entity
             }
 
-            foreach ($data['products'] as $productId) {
-                $product = $entityManager->getRepository(Product::class)->find($productId);
-                if ($product) {
-                    $order->addIdProduct($product);
+            // Add updated products with quantity
+            foreach ($data['products'] as $productData) {
+                if (isset($productData['id']) && isset($productData['quantity'])) {
+                    $product = $entityManager->getRepository(Product::class)->find($productData['id']);
+                    if ($product) {
+                        if ($product->getStock() >= $productData['quantity']) {
+                            $orderProduct = new OrderProduct();
+                            $orderProduct->setOrderId($order);
+                            $orderProduct->setProductId($product);
+                            $orderProduct->setQuantity($productData['quantity']);
+                            $order->addOrderProductId($orderProduct); // Assuming an addOrderProduct method exists
+                            $entityManager->persist($orderProduct);
+                        } else {
+                            return $this->json([
+                                'error' => "Product with ID {$productData['id']} has insufficient stock (requested: {$productData['quantity']}).",
+                            ], JsonResponse::HTTP_BAD_REQUEST);
+                        }
+                    } else {
+                        return $this->json([
+                            'error' => "Product with ID {$productData['id']} not found.",
+                        ], JsonResponse::HTTP_BAD_REQUEST);
+                    }
                 } else {
                     return $this->json([
-                        'error' => "Product with ID {$productId} not found.",
+                        'error' => 'Each product must have an ID and a quantity.',
                     ], JsonResponse::HTTP_BAD_REQUEST);
                 }
             }
@@ -124,4 +208,5 @@ final class OrderController extends AbstractController
             'message' => "Order with ID {$data['order_id']} updated successfully!",
         ]);
     }
+
 }
