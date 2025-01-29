@@ -84,4 +84,56 @@ final class OrderController extends AbstractController
             'message' => "Order with ID {$data['order_id']} deleted successfully!",
         ], JsonResponse::HTTP_OK);
     }
+
+    public function updateOrder(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['order_id'])) {
+            return $this->json([
+                'error' => 'Order ID is required.',
+            ], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $order = $entityManager->getRepository(Order::class)->find($data['order_id']);
+
+        if (!$order) {
+            return $this->json([
+                'error' => "Order with ID {$data['order_id']} not found.",
+            ], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        if (isset($data['name'])) {
+            $order->setName($data['name']);
+        }
+        if (isset($data['description'])) {
+            $order->setDescription($data['description']);
+        }
+        if (isset($data['date'])) {
+            $order->setDate(new DateTime($data['date']));
+        }
+
+        if (isset($data['products'])) {
+            foreach ($order->getIdProduct() as $product) {
+                $order->removeIdProduct($product);
+            }
+
+            foreach ($data['products'] as $productId) {
+                $product = $entityManager->getRepository(Product::class)->find($productId);
+                if ($product) {
+                    $order->addIdProduct($product);
+                } else {
+                    return $this->json([
+                        'error' => "Product with ID {$productId} not found.",
+                    ], JsonResponse::HTTP_BAD_REQUEST);
+                }
+            }
+        }
+
+        $entityManager->flush();
+
+        return $this->json([
+            'message' => "Order with ID {$data['order_id']} updated successfully!",
+        ]);
+    }
 }
