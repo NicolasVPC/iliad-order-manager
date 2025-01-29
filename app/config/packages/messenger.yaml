@@ -9,7 +9,8 @@ framework:
             # failed: 'doctrine://default?queue_name=failed'
             # sync: 'sync://'
             redis_queue:
-                dsn: 'redis://127.0.0.1:8089/messages'
+                # dsn: 'redis://127.0.0.1:8089/messages'
+                dsn: 'redis://redis:6379/messages'
                 options:
                     stream_max_entries: 10000
 

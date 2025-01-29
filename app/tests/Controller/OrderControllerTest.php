@@ -14,6 +14,7 @@ final class OrderControllerTest extends WebTestCase
 
     //     self::assertResponseIsSuccessful();
     // }
+    
     public function testCreateOrder(): void
     {
         $client = static::createClient();
@@ -31,7 +32,12 @@ final class OrderControllerTest extends WebTestCase
                 'name' => 'nome test',
                 'description' => 'description test',
                 'date' => $formattedDate,
-                'products' => [1,2,3,4],
+                'products' => [
+                    ['id' => 1, 'quantity' => 2],
+                    ['id' => 2, 'quantity' => 3],
+                    ['id' => 3, 'quantity' => 1],
+                    ['id' => 4, 'quantity' => 2]
+                ],
             ])
         );
     

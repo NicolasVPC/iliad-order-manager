@@ -42,7 +42,6 @@ final class OrderController extends AbstractController
             $data['description'] = null;
         }
 
-        // Dispatch job to Redis queue
         $this->bus->dispatch(new CreateOrderMessage($data));
 
         return new JsonResponse(['message' => 'Order request received, processing in queue.']);

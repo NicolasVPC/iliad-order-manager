@@ -3,6 +3,7 @@
 namespace App\MessageHandler;
 
 use App\Entity\Order;
+use App\Entity\OrderProduct;
 use App\Entity\Product;
 use App\Message\CreateOrderMessage;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,16 +28,28 @@ final class CreateOrderMessageHandler
         $order->setDescription($data['description']);
         $order->setDate(new \DateTime($data['date']));
 
-        foreach ($data['products'] as $productId) {
-            $product = $this->entityManager->getRepository(Product::class)->find($productId);
+        foreach ($data['products'] as $product_el) {
+            $product = $this->entityManager->getRepository(Product::class)->find($product_el['id']);
             if ($product) {
-                $order->addIdProduct($product);
+                if ($product->getStock() >= $product_el['quantity']) {
+                    $orderProduct = new OrderProduct();
+                    $orderProduct->setOrderId($order);
+                    $orderProduct->setProductId($product);
+                    $orderProduct->setQuantity($product_el['quantity']);
+                    $order->addOrderProductId($orderProduct);
+                    
+                    $this->entityManager->persist($orderProduct);
+                }
+                else {
+                    echo "Product with ID {$product_el['id']} has not sufficient stock (stock requested: {$product_el['quantity']}).\n";
+                    return;
+                }
             } else {
-                echo "Product with ID {$productId} not found.\n";
+                echo "Product with ID {$product_el['id']} not found.\n";
                 return;
             }
         }
-
+        
         $this->entityManager->persist($order);
         $this->entityManager->flush();
 
