@@ -2,6 +2,28 @@
 Iliad Order Manager is a system to monitor and manage daily user orders.
 
 ## documentation environment
+## set up env variables
+You need to create two `.env` files inside `/doc`: `db.env` and `wiki.env`
+
+`db.env` </br>
+``` env
+MARIADB_ROOT_PASSWORD=securerootpassword
+MYSQL_DATABASE=iom-wiki
+MYSQL_USER=iom-wikijs
+MYSQL_PASSWORD=securepassword
+```
+Choose the values you prefer, just keep in mind they have to match their counterparts in `wiki.env`
+
+`wiki.env`
+``` env
+ADMIN_EMAIL=example@mail.com
+ADMIN_PASS=secureadminpassword
+DB_USER=iom-wikijs
+DB_PASS=securepassword
+DB_NAME=iom-wiki
+```
+
+## Run the documentation
 The documentation can be up with
 ``` bash
 docker-compose -f ./doc/docker-compose.yaml up -d
