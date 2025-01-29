@@ -13,11 +13,6 @@ create_order:
     controller: App\Controller\OrderController::createOrder
     methods: POST
 
-create_order_test:
-    path: /test/create/order
-    controller: App\Controller\OrderController::createOrderTest
-    methods: POST
-
 get_product:
     path: /get/product
     controller: App\Controller\ProductController::getProduct

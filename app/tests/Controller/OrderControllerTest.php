@@ -42,7 +42,7 @@ final class OrderControllerTest extends WebTestCase
         );
     
         self::assertResponseIsSuccessful();
-        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(201, $client->getResponse()->getStatusCode());
         self::assertJson($client->getResponse()->getContent());
     }
 
@@ -55,7 +55,7 @@ final class OrderControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/test/create/order',
+            '/create/order',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
@@ -107,7 +107,7 @@ final class OrderControllerTest extends WebTestCase
     
         $client->request(
             'POST',
-            '/test/create/order',
+            '/create/order',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],

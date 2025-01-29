@@ -97,6 +97,6 @@ MYSQL_USER=tester
 MYSQL_PASSWORD=securepassword
 MYSQL_DATABASE=app
 ```
-
+<>
 `docker compose up -d` should start the php and database services.
 enable the redis queue: `docker compose exec -d php bin/console messenger:consume redis_queue --time-limit=3600 --memory-limit=128M -vv`
