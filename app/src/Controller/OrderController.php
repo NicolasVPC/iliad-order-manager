@@ -58,4 +58,30 @@ final class OrderController extends AbstractController
             'order_id' => $order->getId(),
         ]);
     }
+
+    public function deleteOrder(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['order_id'])) {
+            return $this->json([
+                'error' => 'Order ID is required.',
+            ], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $order = $entityManager->getRepository(Order::class)->find($data['order_id']);
+
+        if (!$order) {
+            return $this->json([
+                'error' => "Order with ID {$data['order_id']} not found.",
+            ], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        $entityManager->remove($order);
+        $entityManager->flush();
+
+        return $this->json([
+            'message' => "Order with ID {$data['order_id']} deleted successfully!",
+        ], JsonResponse::HTTP_OK);
+    }
 }
