@@ -8,7 +8,7 @@ lucky_number:
     # controller class, you can skip the '::method_name' part:
     # controller: App\Controller\BlogController
 
-create_product:
+create_order:
     path: /create/order
     controller: App\Controller\OrderController::createOrder
     methods: POST
@@ -17,3 +17,8 @@ get_product:
     path: /get/product
     controller: App\Controller\ProductController::getProduct
     methods: GET
+
+delete_order:
+    path: /delete/order
+    controller: App\Controller\OrderController::deleteOrder
+    methods: DELETE
