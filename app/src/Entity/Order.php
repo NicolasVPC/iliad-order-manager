@@ -27,14 +27,14 @@ class Order
     private ?\DateTimeInterface $date = null;
 
     /**
-     * @var Collection<int, Product>
+     * @var Collection<int, OrderProduct>
      */
-    #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'id_order')]
-    private Collection $id_product;
+    #[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'order_id', orphanRemoval: true)]
+    private Collection $orderProducts;
 
     public function __construct()
     {
-        $this->id_product = new ArrayCollection();
+        $this->orderProducts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -86,25 +86,31 @@ class Order
     }
 
     /**
-     * @return Collection<int, Product>
+     * @return Collection<int, OrderProduct>
      */
-    public function getIdProduct(): Collection
+    public function getOrderProductId(): Collection
     {
-        return $this->id_product;
+        return $this->orderProducts;
     }
 
-    public function addIdProduct(Product $idProduct): static
+    public function addOrderProductId(OrderProduct $productId): static
     {
-        if (!$this->id_product->contains($idProduct)) {
-            $this->id_product->add($idProduct);
+        if (!$this->orderProducts->contains($productId)) {
+            $this->orderProducts->add($productId);
+            $productId->setOrderId($this);
         }
 
         return $this;
     }
 
-    public function removeIdProduct(Product $idProduct): static
+    public function removeOrderProductId(OrderProduct $productId): static
     {
-        $this->id_product->removeElement($idProduct);
+        if ($this->orderProducts->removeElement($productId)) {
+            // set the owning side to null (unless already changed)
+            if ($productId->getOrderId() === $this) {
+                $productId->setOrderId(null);
+            }
+        }
 
         return $this;
     }
