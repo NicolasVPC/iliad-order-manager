@@ -28,3 +28,8 @@ services:
     ports:
       - "8088:3306"
 ###< doctrine/doctrine-bundle ###
+
+  redis:
+    ports: 
+      - "8089:6379"
+
