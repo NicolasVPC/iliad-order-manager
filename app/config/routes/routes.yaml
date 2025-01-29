@@ -27,3 +27,8 @@ update_order:
     path: /update/order
     controller: App\Controller\OrderController::updateOrder
     methods: PUT
+
+get_order:
+    path: /get/order
+    controller: App\Controller\OrderController::getOrder
+    methods: GET
