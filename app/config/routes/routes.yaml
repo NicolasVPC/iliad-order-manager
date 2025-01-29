@@ -32,3 +32,8 @@ get_order:
     path: /get/order
     controller: App\Controller\OrderController::getOrder
     methods: GET
+
+get_order_list:
+    path: /get/order_list
+    controller: App\Controller\OrderController::getOrders
+    methods: GET

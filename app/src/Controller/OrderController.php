@@ -202,4 +202,50 @@ final class OrderController extends AbstractController
             return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_BAD_REQUEST);
         }
     }
+
+    public function getOrders(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $queryBuilder = $entityManager->getRepository(Order::class)->createQueryBuilder('o');
+        
+        $startDate = $request->query->get('start_date');
+        $endDate = $request->query->get('end_date');
+        
+        if ($startDate) {
+            $queryBuilder->andWhere('o.date >= :start_date')
+                         ->setParameter('start_date', new \DateTime($startDate));
+        }
+        
+        if ($endDate) {
+            $queryBuilder->andWhere('o.date <= :end_date')
+                         ->setParameter('end_date', new \DateTime($endDate));
+        }
+    
+        $searchTerm = $request->query->get('search');
+        if ($searchTerm) {
+            $queryBuilder->andWhere('o.name LIKE :search OR o.description LIKE :search')
+                         ->setParameter('search', '%' . $searchTerm . '%');
+        }
+    
+        try {
+            $orders = $queryBuilder->getQuery()->getResult();
+    
+            if (empty($orders)) {
+                return $this->json(['message' => 'No orders found matching the criteria.'], JsonResponse::HTTP_OK);
+            }
+    
+            $orderData = [];
+            foreach ($orders as $order) {
+                $orderData[] = [
+                    'order_id' => $order->getId(),
+                    'name' => $order->getName(),
+                    'description' => $order->getDescription(),
+                    'date' => $order->getDate()->format('Y-m-d H:i:s'),
+                ];
+            }
+    
+            return $this->json($orderData, JsonResponse::HTTP_OK);
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()], JsonResponse::HTTP_BAD_REQUEST);
+        }
+    }    
 }
